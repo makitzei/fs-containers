@@ -1,0 +1,6 @@
+$ sudo docker start -i reverent_cray
+root@eb7925e37c90:/# nano /usr/src/app/index.js 
+root@eb7925e37c90:/# cat /usr/src/app/index.js 
+console.log('Hello World') 
+root@eb7925e37c90:/# exit
+exit
