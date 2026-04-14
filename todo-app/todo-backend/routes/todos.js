@@ -34,13 +34,50 @@ singleRouter.delete('/', async (req, res) => {
 });
 
 /* GET todo. */
-singleRouter.get('/', async (req, res) => {
-  res.sendStatus(405); // Implement this
+router.get('/:id', async (req, res) => {
+  try{
+    const { id } = req.params
+    const todo = await Todo.findById(id)
+  
+    if (todo) {
+      res.json(todo);  
+    } else {
+      res.status(404).json({ message: `No element found with id ${id}`})
+    }
+  } catch (err) {
+    res.status(500).json({error: err.message})
+  }
 });
 
 /* PUT todo. */
-singleRouter.put('/', async (req, res) => {
-  res.sendStatus(405); // Implement this
+router.put('/:id', async (req, res) => {
+  try{
+    const { id } = req.params
+    const text = req.body.text
+    const done = req.body.done
+    const update = {}
+
+    if (text !== undefined) {
+      update.text = text
+    }
+
+    if (done !== undefined) {
+      update.done = done
+    }
+      
+    const todo = await Todo.findByIdAndUpdate(
+      id, 
+      update, 
+      {new: true})
+    
+    if (todo) {
+      res.status(200).json(todo);  
+    } else {
+      res.status(404).json({ message: `No element found with id ${id}`})
+    }
+  } catch(err) {
+    res.status(500).json({error: err.message})
+  }
 });
 
 router.use('/:id', findByIdMiddleware, singleRouter)
