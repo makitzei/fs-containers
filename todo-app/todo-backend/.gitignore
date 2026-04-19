@@ -62,3 +62,6 @@ typings/
 
 # mongo db filesystem storage
 /mongo_data
+
+# redis data
+/redis_data
