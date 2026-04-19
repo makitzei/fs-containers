@@ -1,6 +1,20 @@
 const express = require('express');
-const { Todo } = require('../mongo')
+const { Todo } = require('../mongo');
 const router = express.Router();
+const { createClient } = require('redis');
+const client = createClient({
+  url: process.env.REDIS_URL,
+});
+
+client.on("error", (err) => {
+  console.error("Redis Client Error", err);
+});
+
+async function initRedis() {
+  await client.connect();
+}
+
+initRedis();
 
 /* GET todos listing. */
 router.get('/', async (_, res) => {
@@ -10,11 +24,22 @@ router.get('/', async (_, res) => {
 
 /* POST todo to listing. */
 router.post('/', async (req, res) => {
-  const todo = await Todo.create({
-    text: req.body.text,
-    done: false
-  })
-  res.send(todo);
+  try {
+    const todo = await Todo.create({
+      text: req.body.text,
+      done: false
+    });
+
+    client.incr('todos:added_todos').catch(console.error);
+
+    res.status(201).json(todo);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to add a new todo'})
+  }
+  
+
+  
 });
 
 const singleRouter = express.Router();
@@ -26,6 +51,18 @@ const findByIdMiddleware = async (req, res, next) => {
 
   next()
 }
+
+/* GET added todos. */
+router.get('/statistics', async (req, res) => {
+  try{
+    const new_todos = Number(await client.get('todos:added_todos')) || 0
+    res.json({
+      added_todos: new_todos
+    });  
+  } catch (err) {
+    res.status(500).json({ error: err.message })
+  }
+});
 
 /* DELETE todo. */
 singleRouter.delete('/', async (req, res) => {
@@ -45,7 +82,7 @@ router.get('/:id', async (req, res) => {
       res.status(404).json({ message: `No element found with id ${id}`})
     }
   } catch (err) {
-    res.status(500).json({error: err.message})
+    res.status(500).json({ error: err.message })
   }
 });
 
