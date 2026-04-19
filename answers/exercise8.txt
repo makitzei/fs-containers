@@ -1,0 +1,80 @@
+$ sudo docker exec -it todo-backend-mongo-1 mongosh
+[sudo] password for user: 
+Current Mongosh Log ID: 69e502258452d2693644ba88
+Connecting to:          mongodb://127.0.0.1:27017/?directConnection=true&serverSelectionTimeoutMS=2000&appName=mongosh+2.8.2
+Using MongoDB:          undefined
+Using Mongosh:          2.8.2
+
+For mongosh info see: https://www.mongodb.com/docs/mongodb-shell/
+
+
+To help improve our products, anonymous usage data is collected and sent to MongoDB periodically (https://www.mongodb.com/legal/privacy-policy).
+You can opt-out by running the disableTelemetry() command.
+
+test> show dbs
+MongoServerError[Unauthorized]: Command listDatabases requires authentication
+test> exit
+$ sudo docker exec -it todo-backend-mongo-1 mongosh -u root -p example
+Current Mongosh Log ID: 69e502a72e4b2e555444ba88
+Connecting to:          mongodb://<credentials>@127.0.0.1:27017/?directConnection=true&serverSelectionTimeoutMS=2000&appName=mongosh+2.8.2
+Using MongoDB:          8.2.6
+Using Mongosh:          2.8.2
+
+For mongosh info see: https://www.mongodb.com/docs/mongodb-shell/
+
+------
+   The server generated these startup warnings when booting
+   2026-04-19T16:22:47.816+00:00: Using the XFS filesystem is strongly recommended with the WiredTiger storage engine. See http://dochub.mongodb.org/core/prodnotes-filesystem
+   2026-04-19T16:22:48.118+00:00: Soft rlimits for open file descriptors too low
+   2026-04-19T16:22:48.118+00:00: For customers running the current memory allocator, we suggest changing the contents of the following sysfsFile
+   2026-04-19T16:22:48.118+00:00: For customers running the current memory allocator, we suggest changing the contents of the following sysfsFile
+   2026-04-19T16:22:48.118+00:00: We suggest setting the contents of sysfsFile to 0.
+   2026-04-19T16:22:48.119+00:00: We suggest setting swappiness to 0 or 1, as swapping can cause performance problems.
+------
+
+test> show dbs
+admin         100.00 KiB
+config         72.00 KiB
+local          72.00 KiB
+the_database   52.00 KiB
+test> use the_database
+switched to db the_database
+the_database> show collections
+todos
+the_database> db.todos.find({})
+[
+  {
+    _id: ObjectId('69de486a7ef231d14744ba89'),
+    text: 'Write more code',
+    done: true
+  },
+  {
+    _id: ObjectId('69de486a7ef231d14744ba8a'),
+    text: 'Learn about containers',
+    done: false
+  }
+]
+the_database> db.todos.insertOne({ text: "Increase the number of tools in my tool belt", done: false })
+{
+  acknowledged: true,
+  insertedId: ObjectId('69e504102e4b2e555444ba89')
+}
+the_database> db.todos.find({})
+[
+  {
+    _id: ObjectId('69de486a7ef231d14744ba89'),
+    text: 'Write more code',
+    done: true
+  },
+  {
+    _id: ObjectId('69de486a7ef231d14744ba8a'),
+    text: 'Learn about containers',
+    done: false
+  },
+  {
+    _id: ObjectId('69e504102e4b2e555444ba89'),
+    text: 'Increase the number of tools in my tool belt',
+    done: false
+  }
+]
+the_database> exit
