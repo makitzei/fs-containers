@@ -42,7 +42,7 @@ router.post('/', async (req, res) => {
   
 });
 
-const singleRouter = express.Router();
+// const singleRouter = express.Router();
 
 const findByIdMiddleware = async (req, res, next) => {
   const { id } = req.params
@@ -65,59 +65,38 @@ router.get('/statistics', async (req, res) => {
 });
 
 /* DELETE todo. */
-singleRouter.delete('/', async (req, res) => {
-  await req.todo.delete()  
+router.delete('/:id', findByIdMiddleware, async (req, res) => {
+  await req.todo.deleteOne()  
   res.sendStatus(200);
 });
 
 /* GET todo. */
-router.get('/:id', async (req, res) => {
-  try{
-    const { id } = req.params
-    const todo = await Todo.findById(id)
-  
-    if (todo) {
-      res.json(todo);  
-    } else {
-      res.status(404).json({ message: `No element found with id ${id}`})
-    }
-  } catch (err) {
-    res.status(500).json({ error: err.message })
-  }
+router.get('/:id', findByIdMiddleware, async (req, res) => {
+  res.json(req.todo);
 });
 
 /* PUT todo. */
-router.put('/:id', async (req, res) => {
+router.put('/:id', findByIdMiddleware, async (req, res) => {
   try{
-    const { id } = req.params
     const text = req.body.text
     const done = req.body.done
-    const update = {}
 
     if (text !== undefined) {
-      update.text = text
+      req.todo.text = text
     }
 
     if (done !== undefined) {
-      update.done = done
+      req.todo.done = done
     }
       
-    const todo = await Todo.findByIdAndUpdate(
-      id, 
-      update, 
-      {new: true})
-    
-    if (todo) {
-      res.status(200).json(todo);  
-    } else {
-      res.status(404).json({ message: `No element found with id ${id}`})
-    }
+    const updated = await req.todo.save();
+    res.json(updated);
   } catch(err) {
     res.status(500).json({error: err.message})
   }
 });
 
-router.use('/:id', findByIdMiddleware, singleRouter)
+// router.use('/:id', findByIdMiddleware, singleRouter)
 
 
 module.exports = router;
